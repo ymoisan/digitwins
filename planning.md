@@ -2,7 +2,9 @@
 
 ## 1. Goal
 
-Develop an Urban Digital Twin (UDT) for a Canadian government organization. The initial phase will focus on integrating existing 3D building data, with subsequent phases incorporating tree data, demonstrating real-time data integration (**e.g., sensor data, camera orientation**), and exploring physics-based simulation capabilities. **A key objective is to establish and demonstrate collaborative, non-destructive workflows leveraging OpenUSD and Nvidia Omniverse Nucleus.** The UDT aims for interoperability using the OpenUSD format, with Nvidia Omniverse as the target platform for interactive visualization, analysis, simulation integration (**including dynamic visualization of camera FOVs**), **and collaborative development**. Data processing and storage will leverage Open Table Formats and cloud/object storage platforms, while exploring ESRI CityEngine for conversion, authoring, and enrichment workflows.
+> Develop a generic Urban Digital Twin (UDT) methodology incorporating data from the "geo" world (think terrain, lidar point clouds, reconstructed buildings, map projections, etc). More than a 3D model, we want a DT that responds to actions from third party systems (think IoT).
+
+The initial phase will focus on integrating existing 3D building data, with subsequent phases incorporating tree data, demonstrating real-time data integration (**e.g., sensor data, camera orientation**), and exploring physics-based simulation capabilities. **A key objective is to establish and demonstrate collaborative, non-destructive workflows leveraging OpenUSD.** The UDT aims for interoperability using the OpenUSD format, with Nvidia Omniverse as the target platform for interactive visualization, analysis, simulation integration (**including dynamic visualization of camera FOVs**), **and collaborative development**. Data processing and storage will leverage Open Table Formats and cloud/object storage platforms, while exploring ESRI CityEngine for conversion, authoring, and enrichment workflows.
 
 ## 2. Scope
 
@@ -34,6 +36,10 @@ Develop an Urban Digital Twin (UDT) for a Canadian government organization. The 
 
 ## 3. Technology Stack
 
+*   **Development Environment & Workflow:**
+    *   **Notebook Environment:** Marimo ([https://marimo.io/](https://marimo.io/)) - *Replacing Jupyter*
+    *   **Code Organization:** Python modules (`*.py`) containing core logic, imported into Marimo notebooks (`*.py` or `*.marimo.html`) for interactive use and presentation.
+    *   **Dependency Management:** Pixi ([https://pixi.sh/](https://pixi.sh/)) - *Replacing Conda/Pip*
 *   **Input Data Formats:**
     *   3D Buildings: 3D GeoPackage, Cesium tiles (containing glTF v2.0)
     *   Building Footprints: GeoPackage, Shapefile
@@ -51,6 +57,7 @@ Develop an Urban Digital Twin (UDT) for a Canadian government organization. The 
 *   **Intermediate/Storage Formats:**
     *   GeoParquet (v1.1), Delta Lake
     *   OpenUSD
+    *   **Building Attributes:** Structured according to Overture Maps Foundation schemas (`building`, `building_part`) potentially linked via GERS IDs for procedural generation.
 *   **Target Visualization, Simulation, & Collaboration Platform:** Nvidia Omniverse
     *   **Omniverse Nucleus:** Collaboration server, **essential for version control, permissions, and non-destructive layering workflows.** [https://docs.omniverse.nvidia.com/nucleus/latest/index.html](https://docs.omniverse.nvidia.com/nucleus/latest/index.html)
     *   Omniverse CityEngine Connector
@@ -67,6 +74,7 @@ Develop an Urban Digital Twin (UDT) for a Canadian government organization. The 
     *   **Geospatial:** PDAL, Fiona, Shapely, rasterio (for terrain)
     *   **Parquet/Delta:** `delta-rs`, PyArrow
     *   **3D/USD/glTF:** USD Python Bindings, Cesium libraries, CityJSON libraries, glTF libraries
+    *   **Procedural Generation:** Python libraries (e.g., Shapely, PyVista) for generating USD from footprints and attributes.
     *   **Real-Time Simulation (Phase 3):** Python libraries for data generation/streaming, Omniverse Python scripting.
     *   **Data Handling/Processing:** Python, Spark (Databricks), TOML
     *   **Camera Data Parsing:** Libraries for parsing camera specifications
@@ -74,14 +82,15 @@ Develop an Urban Digital Twin (UDT) for a Canadian government organization. The 
 ## 4. Data Sources
 
 *   **Primary:** Internally generated 3D Buildings (GeoPackage, Cesium Tiles/glTF).
-*   **Supporting/Reference:** Footprints (GeoAI, Auto Buildings, ODB), Lidar Point Clouds.
+*   **Supporting/Reference:** Footprints (GeoAI, Auto Buildings, ODB - **Evaluate for GERS ID usage/potential, and attribute richness**), Lidar Point Clouds.
+*   **Attributes for Procedural Generation:** Sourced/derived attributes corresponding to Overture building/part schemas (e.g., height, floor count, roof type).
 *   **Phase 2:** Potential Tree Point Locations.
 *   **Phase 3:** Simulated IoT Sensor Data, **Camera location/spec data**, **Terrain data for simulation**, **Simulation results from SimScale**.
 
 ## 5. High-Level Direction
 
-1.  **Data Conversion & Storage Strategy:** (As before - GeoPackage/glTF -> CityEngine/GeoParquet -> Delta Lake).
-2.  **USD Pipeline Evaluation:** (As before - Compare multiple pathways).
+1.  **Data Conversion & Storage Strategy:** Evaluate both direct conversion of existing 3D models (GeoPackage/glTF -> USD) and **procedural generation (Footprints + Overture Attributes -> USD)**. Store attributes alongside footprints (e.g., in GeoParquet/Delta Lake), potentially using Overture GERS IDs for linking.
+2.  **USD Pipeline Evaluation:** Compare pathways: Direct Conversion vs. Procedural Generation vs. CityEngine (for direct import *or* procedural rules). Evaluate based on alignment, fidelity, attribute requirements, and performance.
 3.  **Platform Integration:** (As before - Omniverse, CityEngine, FSDH, MinIO).
 4.  **USD Scene Architecture:** Define a robust scene composition strategy using USD layering and referencing early on to facilitate non-destructive updates and collaboration through Omniverse Nucleus.
 5.  **Scalability & Performance:** (Adjusted from 4 - Leverage platforms for scale).
@@ -91,6 +100,9 @@ Develop an Urban Digital Twin (UDT) for a Canadian government organization. The 
 ## 6. Risks & Challenges
 
 *   (Existing risks remain regarding format conversion, tooling, scalability, learning curve, licensing, data consistency, Delta Lake management, FSDH environment)
+*   **Attribute Sourcing & Quality:** Acquiring sufficient and accurate attributes (height, floors, roof details) required for meaningful procedural generation is a significant challenge. Data may be incomplete or inconsistent.
+*   **Procedural Model Fidelity:** Procedurally generated models are representations and may lack the geometric accuracy of Lidar-derived models, although they solve alignment issues.
+*   **New Tooling Adoption:** Learning curve associated with Marimo (reactive notebooks) and Pixi (dependency management). Ensuring the notebook/sidecar pattern remains efficient for complex workflows.
 *   **Real-Time Integration Complexity (Phase 3):** Developing custom Omniverse extensions/scripts **using Kit SDK** requires specific knowledge. Ensuring performance with potentially high-frequency data streams needs investigation.
 *   **Simulation vs. Reality (Phase 3):** The initial PoC will use simulated data. Bridging to actual real-world IoT data sources involves additional complexities (protocols, security, data infrastructure).
 *   **USD Schema for Real-Time Data/Cameras:** Defining how real-time data links, camera parameters (`UsdGeomCamera`), and dynamic FOV geometry are represented within USD.
