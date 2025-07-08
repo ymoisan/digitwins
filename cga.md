@@ -1,5 +1,11 @@
 # [CGA](https://doc.arcgis.com/en/cityengine/2024.0/help/help-cga-modeling-overview.htm) rule files for digital twins
 
+As mentioned in the url above : "Computer Generated Architecture (CGA) is a programming language that is used to instruct CityEngine how to automatically generate 3D geometry, and particularly architecture."
+
+The rules shown below were devised to apply to 3D buildings and trees.  Here is an example of applying those rules to data.
+
+![image info](./trees-buildings-cga.png)
+
 ## Buildings
 
 This rule file works on  individual surfaces, that is when features are not complete 3D buildings but rather buildings are made up of several surfaces like individual walls, roof sides, etc.  In this case, we're looking at `roof surfaces` and applying colors as a function of how far away from due South the roof surface normal points to.
