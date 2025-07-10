@@ -4,7 +4,7 @@ As mentioned in the url above : "Computer Generated Architecture (CGA) is a prog
 
 The rules shown below were devised to apply to 3D buildings and trees.  Here is an example of applying those rules to data.
 
-![image info](./trees-buildings-cga.png)
+![CGA rendering](./images/trees-buildings-cga.png)
 
 ## Buildings
 

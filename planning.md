@@ -1,116 +1,108 @@
-# TOP POSTING : this document is overkill.  Will delete soon.
+# Digital Twin for a Common Operating Picture
 
-# Urban Digital Twin (UDT) Project Plan
+## Objective
 
-## 1. Goal
+Develop a Digital Twin that integrates physical infrastructure (buildings, vegetation, roads, water bodies) with live sensor data (cameras, motion detectors, data loggers) into a USD stage that serves as a **Common Operating Picture** for stakeholders.
 
-> Develop a generic Urban Digital Twin (UDT) methodology incorporating data from the "geo" world (think terrain, lidar point clouds, reconstructed buildings, map projections, etc). More than a 3D model, we want a DT that responds to actions from third party systems (think IoT).
+![dt components](./images/dt-components.png)
 
-The initial phase will focus on integrating existing 3D building data, with subsequent phases incorporating tree data, demonstrating real-time data integration (**e.g., sensor data, camera orientation**), and exploring physics-based simulation capabilities. **A key objective is to establish and demonstrate collaborative, non-destructive workflows leveraging OpenUSD.** The UDT aims for interoperability using the OpenUSD format, with Nvidia Omniverse as the target platform for interactive visualization, analysis, simulation integration (**including dynamic visualization of camera FOVs**), **and collaborative development**. Data processing and storage will leverage Open Table Formats and cloud/object storage platforms, while exploring ESRI CityEngine for conversion, authoring, and enrichment workflows.
+## Scope
 
-## 2. Scope
+**Physical Infrastructure:**
+- 3D buildings and terrain
+- Vegetation and road networks  
+- Water bodies and utilities
 
-*   **Phase 1:** (Focus: Static Data Integration & Visualization Setup)
-    *   Ingest and process existing 3D building data (GeoPackage, Cesium/glTF).
-    *   Evaluate GeoParquet 1.1 for vector/attribute storage.
-    *   Evaluate and establish pipelines to convert/import source formats into OpenUSD (including CityEngine workflows).
-    *   Set up data handling workflows (Delta Lake on FSDH/MinIO).
-    *   Set up Omniverse (Nucleus) environment.
-    *   Evaluate visual fidelity and data integrity.
-*   **Phase 2:** (Focus: Enrichment, Procedural Content, **& Basic Collaboration**)
-    *   Investigate methods for sourcing or generating point locations for trees.
-    *   Utilize ArcGIS CityEngine's built-in vegetation libraries and procedural rules to place 3D tree models.
-    *   Integrate the procedurally generated vegetation into the OpenUSD scene.
-    *   Explore and implement interactive features within Omniverse (data querying, basic scenario simulation).
-    *   Integrate outputs from newer processing tools like Roofer.
-    *   **Define and implement a strategy for USD scene composition (layering, referencing) to enable non-destructive updates.**
-    *   **Demonstrate a non-destructive workflow for updating building data (add/replace) within the UDT scene using USD layers/references and Omniverse Nucleus.**
-*   **Phase 3 (Future):** (Focus: Dynamic Data, Simulation Integration, **& Advanced Collaboration**)
-    *   **Set up the Omniverse Kit SDK development environment.**
-    *   Develop proofs-of-concept for integrating simulated real-time data with the UDT in Omniverse:
-        *   **IoT Sensor Data:** Update building visualization (e.g., color) based on simulated temperature data.
-        *   **Camera Field of View (FOV):** Dynamically visualize camera FOV (e.g., a cone) based on simulated orientation data streams.
-    *   Develop a proof-of-concept for integrating physics-based simulation results (flood analysis using SimScale).
-    *   Prepare necessary UDT data for simulations (terrain, simplified buildings, camera locations/specs).
-    *   Run basic simulation scenarios (flood, camera orientation) and visualize results/updates within the Omniverse UDT scene.
-    *   Further explore and refine collaborative workflows.
-    *   Research and document potential architectures for scaling real-time data handling, simulation workflows, **and collaborative scene management.**
+**Sensor Integration:**
+- Camera feeds and imagery
+- Motion detection systems
+- Environmental data loggers
+- GPS tracking devices
 
-## 3. Technology Stack
+**Target Platform:**
+- OpenUSD format for interoperability
+- Nvidia Omniverse for visualization and collaboration
+- Real-time sensor data integration
+- Web-based stakeholder access
 
-*   **Development Environment & Workflow:**
-    *   **Notebook Environment:** Marimo ([https://marimo.io/](https://marimo.io/)) - *Replacing Jupyter*
-    *   **Code Organization:** Python modules (`*.py`) containing core logic, imported into Marimo notebooks (`*.py` or `*.marimo.html`) for interactive use and presentation.
-    *   **Dependency Management:** Pixi ([https://pixi.sh/](https://pixi.sh/)) - *Replacing Conda/Pip*
-*   **Input Data Formats:**
-    *   3D Buildings: 3D GeoPackage, Cesium tiles (containing glTF v2.0)
-    *   Building Footprints: GeoPackage, Shapefile
-    *   Point Clouds: LAS/LAZ
-    *   **Terrain Data:** (Required for flood simulation - format TBD, e.g., DEM from Lidar)
-    *   Tree Data (Phase 2): Point locations
-    *   **Camera Data (Phase 3):** Point locations (with height/initial orientation), Camera specifications (potentially URL refs)
-    *   Simulated Real-Time Data (Phase 3): JSON, MQTT (for temperature, camera orientation)
-*   **Intermediate / Component Formats:**
-    *   glTF (v2.0)
-*   **3D Authoring / Conversion / Generation Tools:**
-    *   ArcGIS CityEngine
-    *   GDAL/OGR, Custom Python Scripts
-    *   Geoflow3D, Roofer
-*   **Intermediate/Storage Formats:**
-    *   GeoParquet (v1.1), Delta Lake
-    *   OpenUSD
-    *   **Building Attributes:** Structured according to Overture Maps Foundation schemas (`building`, `building_part`) potentially linked via GERS IDs for procedural generation.
-*   **Target Visualization, Simulation, & Collaboration Platform:** Nvidia Omniverse
-    *   **Omniverse Nucleus:** Collaboration server, **essential for version control, permissions, and non-destructive layering workflows.** [https://docs.omniverse.nvidia.com/nucleus/latest/index.html](https://docs.omniverse.nvidia.com/nucleus/latest/index.html)
-    *   Omniverse CityEngine Connector
-    *   **Omniverse Kit SDK:** For developing custom extensions/scripts (Phase 3 setup required).
-    *   Potential Omniverse Microservices
-    *   **Omniverse SimScale Converter Extension** (Phase 3)
-    *   **Omniverse USD Primitives:** (e.g., `UsdGeomCamera` for camera representation, `UsdGeomCone` or custom geometry for FOV visualization)
-*   **Cloud Simulation Platform:**
-    *   **SimScale:** For CFD/FEA simulations (Phase 3).
-*   **Data Platforms / Storage:**
-    *   Azure Databricks (FSDH)
-    *   MinIO
-*   **Potential Supporting Tools/Libraries:**
-    *   **Geospatial:** PDAL, Fiona, Shapely, rasterio (for terrain)
-    *   **Parquet/Delta:** `delta-rs`, PyArrow
-    *   **3D/USD/glTF:** USD Python Bindings, Cesium libraries, CityJSON libraries, glTF libraries
-    *   **Procedural Generation:** Python libraries (e.g., Shapely, PyVista) for generating USD from footprints and attributes.
-    *   **Real-Time Simulation (Phase 3):** Python libraries for data generation/streaming, Omniverse Python scripting.
-    *   **Data Handling/Processing:** Python, Spark (Databricks), TOML
-    *   **Camera Data Parsing:** Libraries for parsing camera specifications
+## Technology Stack
 
-## 4. Data Sources
+**Core Components:**
+- **Data Storage**: DeltaLake tables on object storage (S3/MinIO)
+- **Data Processing**: Polars (Rust-backed DataFrames)
+- **Object Storage**: obstore (high-performance S3 access)
+- **3D Platform**: Nvidia Omniverse + USD
+- **Environment**: Pixi for dependency management
 
-*   **Primary:** Internally generated 3D Buildings (GeoPackage, Cesium Tiles/glTF).
-*   **Supporting/Reference:** Footprints (GeoAI, Auto Buildings, ODB - **Evaluate for GERS ID usage/potential, and attribute richness**), Lidar Point Clouds.
-*   **Attributes for Procedural Generation:** Sourced/derived attributes corresponding to Overture building/part schemas (e.g., height, floor count, roof type).
-*   **Phase 2:** Potential Tree Point Locations.
-*   **Phase 3:** Simulated IoT Sensor Data, **Camera location/spec data**, **Terrain data for simulation**, **Simulation results from SimScale**.
+**Development & Testing:**
+- **Notebooks**: Jupyter for interactive testing (one-off tests and end-to-end scenarios)
+- **MQTT Testing**: Interactive sensor simulation and data flow validation
+- **DeltaLake Testing**: Data pipeline verification and performance testing
 
-## 5. High-Level Direction
+**Infrastructure & Deployment:**
+- **Kubernetes Platform**: Rancher Desktop for container orchestration
+- **Omniverse Nucleus**: Deployed in K8S for collaboration and USD storage
+- **Web Applications**: Browser-based interfaces for stakeholder interaction
+- **Omniverse Streaming**: Web-based 3D visualization for non-desktop users
 
-1.  **Data Conversion & Storage Strategy:** Evaluate both direct conversion of existing 3D models (GeoPackage/glTF -> USD) and **procedural generation (Footprints + Overture Attributes -> USD)**. Store attributes alongside footprints (e.g., in GeoParquet/Delta Lake), potentially using Overture GERS IDs for linking.
-2.  **USD Pipeline Evaluation:** Compare pathways: Direct Conversion vs. Procedural Generation vs. CityEngine (for direct import *or* procedural rules). Evaluate based on alignment, fidelity, attribute requirements, and performance.
-3.  **Platform Integration:** (As before - Omniverse, CityEngine, FSDH, MinIO).
-4.  **USD Scene Architecture:** Define a robust scene composition strategy using USD layering and referencing early on to facilitate non-destructive updates and collaboration through Omniverse Nucleus.
-5.  **Scalability & Performance:** (Adjusted from 4 - Leverage platforms for scale).
-6.  **Interoperability & Enrichment:** (Adjusted from 5 - Adhere to standards, leverage CityEngine).
-7.  **Phased Approach:** Tackle buildings (Phase 1), then trees **and basic non-destructive workflows** (Phase 2), then demonstrate real-time data links, simulation, **and potentially more advanced collaboration** (Phase 3).
+**Data Flow:**
+```
+Sensors → DeltaLake → Object Events → Omniverse → USD Updates → Web Interface
+```
 
-## 6. Risks & Challenges
+Schematically
 
-*   (Existing risks remain regarding format conversion, tooling, scalability, learning curve, licensing, data consistency, Delta Lake management, FSDH environment)
-*   **Attribute Sourcing & Quality:** Acquiring sufficient and accurate attributes (height, floors, roof details) required for meaningful procedural generation is a significant challenge. Data may be incomplete or inconsistent.
-*   **Procedural Model Fidelity:** Procedurally generated models are representations and may lack the geometric accuracy of Lidar-derived models, although they solve alignment issues.
-*   **New Tooling Adoption:** Learning curve associated with Marimo (reactive notebooks) and Pixi (dependency management). Ensuring the notebook/sidecar pattern remains efficient for complex workflows.
-*   **Real-Time Integration Complexity (Phase 3):** Developing custom Omniverse extensions/scripts **using Kit SDK** requires specific knowledge. Ensuring performance with potentially high-frequency data streams needs investigation.
-*   **Simulation vs. Reality (Phase 3):** The initial PoC will use simulated data. Bridging to actual real-world IoT data sources involves additional complexities (protocols, security, data infrastructure).
-*   **USD Schema for Real-Time Data/Cameras:** Defining how real-time data links, camera parameters (`UsdGeomCamera`), and dynamic FOV geometry are represented within USD.
-*   **Simulation Data Preparation (Phase 3):** Preparing accurate and suitable geometry (terrain, simplified buildings) and boundary conditions for CFD/FEA simulation in SimScale can be complex and time-consuming.
-*   **Simulation Complexity & Expertise (Phase 3):** Setting up, running, and interpreting CFD simulations requires specific domain knowledge and familiarity with SimScale platform.
-*   **Omniverse-SimScale Integration (Phase 3):** Reliance on the SimScale Converter Extension; potential limitations in data transfer (geometry complexity, result types), performance, or version compatibility.
-*   **USD Composition Complexity:** Managing a potentially complex structure of USD layers and references for a large-scale UDT requires careful planning and adherence to conventions.
-*   **Collaboration Workflow Management:** Defining clear protocols for how different users/teams contribute updates via Nucleus to avoid conflicts and maintain scene integrity.
-*   **Performance with Deep Composition/Dynamic Updates:** Highly layered scenes **or scenes with many dynamically updated elements (like camera FOVs)** can impact performance. 
+![dt diagram](./images/DT-mermaid-diagram.png)
+
+## Current Status
+
+**Phase 1**: Infrastructure setup and sensor data ingestion architecture
+- ✅ Evaluate direct sensor writes to DeltaLake
+- ✅ Test object storage integration
+- 🔄 Establish Omniverse connection patterns
+- ✅ **Base USD Scene**: CityEngine export completed (12-hour export time acceptable for one-time base scene)
+- ❌ **Software Setup**: Cannot currently visualize the USD export - need proper viewing tools
+
+**Infrastructure Challenges:**
+- **USD Visualization**: Need software setup to view and validate the exported USD scene
+- **K8S Deployment**: Need to deploy Omniverse Nucleus and supporting services in Rancher
+- **Stakeholder Access**: Require web-based interfaces for non-technical users
+
+## Tasks
+
+### **Immediate Priority**
+- [ ] **Set up USD viewing tools** - Install and configure software to visualize the exported CityEngine USD scene
+- [ ] **Validate base USD scene** - Review exported buildings, trees, roads for quality and accuracy
+- [ ] **Test MinIO sensor credentials** - Verify sensor can write to collab-ym bucket with proper authentication (notebook testing)
+
+### **Infrastructure Deployment**  
+- [ ] **Deploy Omniverse Nucleus in Rancher** - Set up K8S deployment for collaborative USD storage
+- [ ] **Configure Omniverse streaming** - Enable web-based 3D visualization for stakeholders
+- [ ] **Set up web applications** - Create browser interfaces for non-technical user access
+- [ ] **Test K8S deployment** - Verify Nucleus accessibility and performance in Rancher environment
+
+### **Sensor Data Pipeline**
+- [ ] **Implement sensor → DeltaLake writer** - Create minimal code using obstore + delta-rs (notebook prototyping)
+- [ ] **Set up object storage events** - Configure MinIO/S3 events to trigger USD updates
+- [ ] **Create Omniverse extension** - Develop Kit SDK extension to read DeltaLake and update USD
+- [ ] **Test sensor data integration** - Validate GPS/camera data appears in USD scene (notebook testing)
+
+### **End-to-End Testing**
+- [ ] **Deploy test sensors** - Set up simulated camera and GPS data sources (notebook simulation)
+- [ ] **Validate data flow** - Test complete pipeline: sensor → DeltaLake → Omniverse → web interface (notebook end-to-end testing)
+- [ ] **Stakeholder demo** - Demonstrate Common Operating Picture with live sensor updates
+- [ ] **Performance optimization** - Tune system for operational latency and throughput requirements
+
+## Miscellaneous
+
+**Supporting Initiatives:** Side projects and contributions that enable or improve the main digital twin objective.
+
+### **CityJSON QGIS Plugin Data Type Fix**
+- **Issue**: [cityjson-qgis-plugin#68](https://github.com/cityjson/cityjson-qgis-plugin/issues/68) - Plugin imported all attributes as strings, breaking numeric CGA rules
+- **Impact**: Prevented use of CGA rules for tree crown area calculations and other numeric comparisons in building/vegetation processing
+- **Solution**: Implemented `SemanticSurfaceFieldsDecorator` class to preserve original data types (int, float, bool) during import.
+
+Here is an example of 'after' and 'before'
+![data type import fix](./images/after-before.png)
+- **Status**: ✅ Fixed - numeric attributes now properly typed, enabling CGA rules for procedural generation
+- **Relevance**: Essential for CityEngine workflows that generate the base USD scene with buildings and vegetation 
